@@ -1,11 +1,32 @@
-var links = [];
 var casper = require('casper').create();
+var links = [];
+var searchEnd = false;
+var arrow;
+var start = 0;
+var url;
 
 function getLinks() {
     var links = document.querySelectorAll('h3.r a');
-    return Array.prototype.map.call(links, function(e) {
+    var response = {};
+
+    response.searchEnd = document.querySelector('#pnnext');
+
+    //searchEnd = document.querySelectorAll('#pnnext') === null;
+    //this.echo(document.querySelectorAll('#pnnext'));
+    response.data = Array.prototype.map.call(links, function(e) {
         return e.getAttribute('href');
     });
+
+    return response;
+}
+
+function evalAndAddLinks(ctx) {
+  var res = ctx.evaluate(getLinks);
+
+  res.data.forEach(function(v) { console.log( v.slice(7).split('&')[0] )});
+
+  for (var prop in res.searchEnd)
+    console.log('res.searchEnd is: ', res.searchEnd[prop]);
 }
 
 casper
@@ -27,23 +48,38 @@ casper
 
 casper.then(function() {
     // aggregate results for the 'phantomjs' search
-    links = links.concat(this.evaluate(getLinks)).map(function(v) {return v.slice(7).split('&')[0];}).slice(0, 2);
 
-    this.echo('Links completed! : ', links);
+    //url = this.getCurrentUrl();
+
+    evalAndAddLinks(this);
 });
 
-casper.each(links, function(casper, link) {
-  //this.echo('Each link must operate!');
+casper.repeat(9, function() {
+  if (searchEnd)
+    this.exit();
 
-  this.open(link, function() {
+  start += 10;
 
-    this.echo('Title is: ', this.getTitle() );
-
+  this.thenOpen(url + '&start=' + start, function() {
+    evalAndAddLinks(this);
   });
 });
+
+//casper.thenOpen()
+
+/*casper.eachThen(links, function(link) {
+  console.log('Each link must operate!');
+
+  this.thenOpen(link.data, function(res) {
+
+    console.log('Res is: ', res.url );
+
+  });
+});*/
 
 casper.run(function() {
     // echo results in some pretty fashion
     //this.echo(links.length + ' links found:');
-    this.echo(' - ' + links.join('\n - ')).exit();
+    //this.echo(' - ' + links.join('\n - '))
+    this.exit();
 });
