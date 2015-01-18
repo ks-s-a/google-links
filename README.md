@@ -2,11 +2,11 @@ google-links
 =======
 
 Small casperjs utility for parsing google links to a site.
-Utitlity scan all google results page and print out links.
+Utility scans all google result pages and prints out links.
 
 Usage
 =======
 
-casperjs googlelinks.js example.com
+casperjs google-links.js example.com
 
-Link to the site will filling google search query: "site:example.com".
+Link to the site will filling google search query: "site:example.com". All links will be printed into console.
